@@ -84,7 +84,10 @@ namespace EdtDemo
                 ServiceType = ServiceType.INTERNATIONAL_PRIORITY,
                 ServiceTypeSpecified = true,
                 PackagingType = PackagingType.YOUR_PACKAGING,
-                PackagingTypeSpecified = true
+                PackagingTypeSpecified = true,RateRequestTypes = new RateRequestType[]
+                {
+                    RateRequestType.LIST, RateRequestType.PREFERRED
+                }
             };
             SetOrigin(request);
             SetDestination(request);
@@ -182,7 +185,7 @@ namespace EdtDemo
 
             };
 
-\
+
             request.RequestedShipment.CustomsClearanceDetail = customClearanceDetail;
         }
 

@@ -37,7 +37,7 @@ namespace EdtDemo
         {
             // Return a file name to log the trace information to, based on the
             // type.
-            return "E:\\Tmp\\" + webServiceType.FullName + ".log";
+            return "H:\\Tmp\\" + webServiceType.FullName + ".log";
         }
 
         // Receive the file name stored by GetInitializer and store it in a
@@ -116,7 +116,7 @@ namespace EdtDemo
     public class TraceExtensionAttribute : SoapExtensionAttribute
     {
 
-        private string _filename = "E:\\tmp\\log.txt";
+        private string _filename = "H:\\tmp\\log.txt";
         private int _priority;
 
         public override Type ExtensionType

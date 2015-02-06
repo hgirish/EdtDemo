@@ -7,18 +7,23 @@ namespace EdtDemo
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             RateRequest request = CreateRateRequest();
-            //
-            RateService service = new RateService();
-           // service.Url = "https://ws.fedex.com:443/web-services/rate";
-            
+
+            var service = new RateService();
+
+            string productId = ConfigurationManager.AppSettings["productID"];
+            if (productId == "Production")
+            {
+                service.Url = "https://ws.fedex.com:443/web-services/rate";
+            }
+
+
+
             try
             {
-                // Call the web service passing in a RateRequest and returning a RateReply
-                RateReply reply = service.getRates(request);
-                
+                var reply = service.getRates(request);
                 if (reply.HighestSeverity == NotificationSeverityType.SUCCESS || reply.HighestSeverity == NotificationSeverityType.NOTE || reply.HighestSeverity == NotificationSeverityType.WARNING)
                 {
                     ShowRateReply(reply);
@@ -40,79 +45,84 @@ namespace EdtDemo
         private static RateRequest CreateRateRequest()
         {
             // Build a RateRequest
-            RateRequest request = new RateRequest();
-            //
-            request.WebAuthenticationDetail = new WebAuthenticationDetail();
-            request.WebAuthenticationDetail.UserCredential = new WebAuthenticationCredential();
-            request.WebAuthenticationDetail.UserCredential.Key = ConfigurationManager.AppSettings["key"]; 
-            request.WebAuthenticationDetail.UserCredential.Password = ConfigurationManager.AppSettings["password"]; 
+            var request = new RateRequest
+            {
+                WebAuthenticationDetail = new WebAuthenticationDetail
+                {
+                    UserCredential = new WebAuthenticationCredential
+                    {
+                        Key = ConfigurationManager.AppSettings["key"],
+                        Password = ConfigurationManager.AppSettings["password"]
+                    }
+                },
+                ClientDetail =
+                    new ClientDetail
+                    {
+                        AccountNumber = ConfigurationManager.AppSettings["accountnumber"],
+                        MeterNumber = ConfigurationManager.AppSettings["meternumber"]
+                    },
+                TransactionDetail = new TransactionDetail { CustomerTransactionId = "***Rate Request using VC#***" },
+                Version = new VersionId(),
+                ReturnTransitAndCommit = true,
+                ReturnTransitAndCommitSpecified = true
+            };
 
-           
-            //
-            request.ClientDetail = new ClientDetail();
-            request.ClientDetail.AccountNumber = ConfigurationManager.AppSettings["accountnumber"]; 
-            request.ClientDetail.MeterNumber = ConfigurationManager.AppSettings["meternumber"]; 
-           
-            //
-            request.TransactionDetail = new TransactionDetail();
-            request.TransactionDetail.CustomerTransactionId = "***Rate Request using VC#***"; // This is a reference field for the customer.  Any value can be used and will be provided in the response.
-            //
-            request.Version = new VersionId();
-            //
-            request.ReturnTransitAndCommit = true;
-            request.ReturnTransitAndCommitSpecified = true;
-            //
+
             SetShipmentDetails(request);
 
-            //
+
             return request;
         }
 
         private static void SetShipmentDetails(RateRequest request)
         {
-            request.RequestedShipment = new RequestedShipment();
-            request.RequestedShipment.ShipTimestamp = DateTime.Now; // Shipping date and time
-            request.RequestedShipment.ShipTimestampSpecified = true;
-            request.RequestedShipment.DropoffType = DropoffType.REGULAR_PICKUP; //Drop off types are BUSINESS_SERVICE_CENTER, DROP_BOX, REGULAR_PICKUP, REQUEST_COURIER, STATION
-            request.RequestedShipment.ServiceType = ServiceType.INTERNATIONAL_PRIORITY; // Service types are STANDARD_OVERNIGHT, PRIORITY_OVERNIGHT, FEDEX_GROUND ...
-            request.RequestedShipment.ServiceTypeSpecified = true;
-            request.RequestedShipment.PackagingType = PackagingType.YOUR_PACKAGING; // Packaging type FEDEX_BOK, FEDEX_PAK, FEDEX_TUBE, YOUR_PACKAGING, ...
-            request.RequestedShipment.PackagingTypeSpecified = true;
-            //
+            request.RequestedShipment = new RequestedShipment
+            {
+                ShipTimestamp = DateTime.Now,
+                ShipTimestampSpecified = true,
+                DropoffType = DropoffType.REGULAR_PICKUP,
+                ServiceType = ServiceType.INTERNATIONAL_PRIORITY,
+                ServiceTypeSpecified = true,
+                PackagingType = PackagingType.YOUR_PACKAGING,
+                PackagingTypeSpecified = true
+            };
             SetOrigin(request);
-            //
             SetDestination(request);
-            //
             SetPackageLineItems(request);
-            //
             SetCustomDetails(request);
-            request.RequestedShipment.TotalInsuredValue = new Money();
-            request.RequestedShipment.TotalInsuredValue.Amount = 100;
-            request.RequestedShipment.TotalInsuredValue.Currency = "USD";
-            //
+            request.RequestedShipment.TotalInsuredValue =
+                new Money { Amount = 100, Currency = "USD" };
             request.RequestedShipment.PackageCount = "1";
         }
 
         private static void SetOrigin(RateRequest request)
         {
-            request.RequestedShipment.Shipper = new Party();
-            request.RequestedShipment.Shipper.Address = new Address();
-            request.RequestedShipment.Shipper.Address.StreetLines = new string[1] { "SHIPPER ADDRESS LINE 1" };
-            request.RequestedShipment.Shipper.Address.City = "COLLIERVILLE";
-            request.RequestedShipment.Shipper.Address.StateOrProvinceCode = "TN";
-            request.RequestedShipment.Shipper.Address.PostalCode = "38017";
-            request.RequestedShipment.Shipper.Address.CountryCode = "US";
+            request.RequestedShipment.Shipper = new Party
+            {
+                Address = new Address
+                {
+                    StreetLines = new[] { "SHIPPER ADDRESS LINE 1" },
+                    City = "COLLIERVILLE",
+                    StateOrProvinceCode = "TN",
+                    PostalCode = "38017",
+                    CountryCode = "US"
+                }
+            };
         }
 
         private static void SetDestination(RateRequest request)
         {
-            request.RequestedShipment.Recipient = new Party();
-            request.RequestedShipment.Recipient.Address = new Address();
-            request.RequestedShipment.Recipient.Address.StreetLines = new string[1] { "RECIPIENT ADDRESS LINE 1" };
-            request.RequestedShipment.Recipient.Address.City = "Montreal";
-            request.RequestedShipment.Recipient.Address.StateOrProvinceCode = "PQ";
-            request.RequestedShipment.Recipient.Address.PostalCode = "5950";
-            request.RequestedShipment.Recipient.Address.CountryCode = "AU";
+            request.RequestedShipment.Recipient = new Party
+            {
+                Address = new Address
+                {
+                    StreetLines = new[] { "RECIPIENT ADDRESS LINE 1" },
+                    City = "Dublin",
+                    StateOrProvinceCode = "IE",
+                    PostalCode = "4",
+                    CountryCode = "IE"
+                }
+            };
         }
 
         private static void SetCustomDetails(RateRequest request)
@@ -136,9 +146,9 @@ namespace EdtDemo
                 {
                     new Commodity
                     {
-                        HarmonizedCode = "847130003300",
-                        Name = "iPad",
-                        Description = "iPad",
+                        HarmonizedCode = "392330100000",
+                        Name = "Plastic Bottle",
+                        Description = "Plastic Bottle",
                         CountryOfManufacture = "CN",
                         Weight = new Weight
                         {
@@ -159,24 +169,31 @@ namespace EdtDemo
                             AmountSpecified = true
                         },
                         NumberOfPieces = "1",
-                        AdditionalMeasures = new []{new Measure(){QuantitySpecified = false}, }
+                        AdditionalMeasures = new []{new Measure {QuantitySpecified = false}}
                         
                     }
+                },
+                CommercialInvoice = new CommercialInvoice()
+                {
+                    FreightCharge =
+                        new Money { Amount = 100m, AmountSpecified = true, Currency = "USD" }
                 }
+
+
             };
 
-
+\
             request.RequestedShipment.CustomsClearanceDetail = customClearanceDetail;
         }
 
-  
+
 
         private static void SetPackageLineItems(RateRequest request)
         {
-           // request.RequestedShipment.PackageCount = "1";
+            // request.RequestedShipment.PackageCount = "1";
             var lineItem = new RequestedPackageLineItem
             {
-               // SequenceNumber = "1",
+                // SequenceNumber = "1",
                 GroupPackageCount = "1",
                 Weight = new Weight
                 {
@@ -193,7 +210,7 @@ namespace EdtDemo
                     Units = LinearUnits.IN,
                     UnitsSpecified = true
                 },
-               // InsuredValue = new Money {Amount = 0, Currency = "USD"}
+                // InsuredValue = new Money {Amount = 0, Currency = "USD"}
             };
 
 
@@ -228,7 +245,7 @@ namespace EdtDemo
         private static void ShowEdtDetail(RateReplyDetail rateReplyDetail)
         {
             var rsd = rateReplyDetail.RatedShipmentDetails;
-            if (rsd == null) throw new ArgumentNullException("rsd");
+            if (rsd == null) throw new ArgumentNullException("rateReplyDetail");
             foreach (var ratedShipmentDetail in rsd)
             {
                 if (ratedShipmentDetail != null)
@@ -238,14 +255,16 @@ namespace EdtDemo
                     if (dat != null)
                         foreach (var commodityTax in dat)
                         {
-                            Console.WriteLine("{0}", commodityTax.HarmonizedCode);
+                            Console.WriteLine("HTC Code: {0}", commodityTax.HarmonizedCode);
                             foreach (var tax in commodityTax.Taxes)
                             {
                                 if (tax != null)
-                                    Console.WriteLine("{0}, {1}, {2}",
-                                        tax.Amount,
-                                        tax.Description,
-                                        tax.Name);
+                                    Console.WriteLine("{0} {1} : {2} {3}",
+                                     tax.Name,
+                                     tax.Description.Replace("&amp;", "").Replace("nbsp;", ""),
+                                     tax.Amount.Amount,
+                                tax.Amount.Currency
+                                        );
                             }
                         }
                 }
@@ -276,7 +295,7 @@ namespace EdtDemo
         private static void ShowDeliveryDetails(RateReplyDetail rateDetail)
         {
             if (rateDetail.DeliveryTimestampSpecified)
-                Console.WriteLine("Delivery timestamp: " + rateDetail.DeliveryTimestamp.ToString());
+                Console.WriteLine("Delivery timestamp: " + rateDetail.DeliveryTimestamp);
             if (rateDetail.TransitTimeSpecified)
                 Console.WriteLine("Transit time: " + rateDetail.TransitTime);
         }
@@ -294,7 +313,7 @@ namespace EdtDemo
                 Console.WriteLine(" Source: {0}", notification.Source);
             }
         }
-       
-        
+
+
     }
 }

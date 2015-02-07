@@ -87,7 +87,8 @@ namespace EdtDemo
                 PackagingTypeSpecified = true,RateRequestTypes = new RateRequestType[]
                 {
                     RateRequestType.LIST, RateRequestType.PREFERRED
-                }
+                },
+                PreferredCurrency = "USD"
             };
             SetOrigin(request);
             SetDestination(request);
@@ -238,19 +239,21 @@ namespace EdtDemo
                 {
                     ShowShipmentRateDetails(shipmentDetail);
                     Console.WriteLine();
+                    ShowEdtDetail(shipmentDetail);
+                    Console.WriteLine();
                 }
                 ShowDeliveryDetails(rateReplyDetail);
-                ShowEdtDetail(rateReplyDetail);
+                
                 Console.WriteLine("**********************************************************");
             }
         }
 
-        private static void ShowEdtDetail(RateReplyDetail rateReplyDetail)
+        private static void ShowEdtDetail(RatedShipmentDetail ratedShipmentDetail)
         {
-            var rsd = rateReplyDetail.RatedShipmentDetails;
-            if (rsd == null) throw new ArgumentNullException("rateReplyDetail");
-            foreach (var ratedShipmentDetail in rsd)
-            {
+           // var rsd = rateReplyDetail.RatedShipmentDetails;
+           // if (rsd == null) throw new ArgumentNullException("rateReplyDetail");
+           // foreach (var ratedShipmentDetail in rsd)
+           // {
                 if (ratedShipmentDetail != null)
                 {
                     var srd = ratedShipmentDetail.ShipmentRateDetail;
@@ -262,16 +265,17 @@ namespace EdtDemo
                             foreach (var tax in commodityTax.Taxes)
                             {
                                 if (tax != null)
-                                    Console.WriteLine("{0} {1} : {2} {3}",
+                                    Console.WriteLine("{0} {1} : {2}  {3} \nFormula: {4} \nTax Type: {5}",
                                      tax.Name,
                                      tax.Description.Replace("&amp;", "").Replace("nbsp;", ""),
                                      tax.Amount.Amount,
-                                tax.Amount.Currency
+                                tax.Amount.Currency,
+                                tax.Formula,tax.TaxType
                                         );
                             }
                         }
                 }
-            }
+           // }
         }
 
         private static void ShowShipmentRateDetails(RatedShipmentDetail shipmentDetail)
